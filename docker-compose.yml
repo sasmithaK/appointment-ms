@@ -1,0 +1,44 @@
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - appointment-network
+    depends_on:
+      - user-service
+      - booking-service
+      - notification-service
+      - appointment-service
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8081:8081"
+    networks:
+      - appointment-network
+
+  booking-service:
+    build: ./booking-service
+    ports:
+      - "8082:8082"
+    networks:
+      - appointment-network
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "8083:8083"
+    networks:
+      - appointment-network
+
+  appointment-service:
+    build: ./appointment-service
+    ports:
+      - "8084:8084"
+    networks:
+      - appointment-network
+
+networks:
+  appointment-network:
+    driver: bridge
