@@ -4,6 +4,7 @@ import com.ctse.user_service.dto.LoginRequest;
 import com.ctse.user_service.dto.LoginResponse;
 import com.ctse.user_service.model.User;
 import com.ctse.user_service.service.UserService;
+import com.ctse.user_service.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/register")
     public ResponseEntity<User> registerUser( @RequestBody User user) {
         User created = userService.registerUser(user);
@@ -28,11 +32,18 @@ public class UserController {
         Optional<User> user = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
         if (user.isPresent()) {
             User loggedInUser = user.get();
+            // Generate JWT token
+            String token = jwtUtil.generateToken(
+                loggedInUser.getEmail(), 
+                loggedInUser.getId(), 
+                loggedInUser.getRole()
+            );
             LoginResponse response = new LoginResponse(
                 "Login successful",
                 loggedInUser.getId(),
                 loggedInUser.getEmail(),
-                loggedInUser.getRole()
+                loggedInUser.getRole(),
+                token
             );
             return ResponseEntity.ok(response);
         }
