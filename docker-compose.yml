@@ -7,7 +7,9 @@ services:
       - appointment-network
 
   api-gateway:
-    build: ./api-gateway
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
     ports:
       - "8080:8080"
     environment:
@@ -24,7 +26,9 @@ services:
       - appointment-service
 
   user-service:
-    build: ./user-service
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
     ports:
       - "8081:8081"
     environment:
@@ -35,7 +39,9 @@ services:
       - mongodb
 
   booking-service:
-    build: ./booking-service
+    build:
+      context: .
+      dockerfile: booking-service/Dockerfile
     ports:
       - "8082:8082"
     environment:
@@ -46,14 +52,18 @@ services:
       - mongodb
 
   notification-service:
-    build: ./notification-service
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
     ports:
       - "8083:8083"
     networks:
       - appointment-network
 
   appointment-service:
-    build: ./appointment-service
+    build:
+      context: .
+      dockerfile: appointment-service/Dockerfile
     ports:
       - "8084:8084"
     networks:
