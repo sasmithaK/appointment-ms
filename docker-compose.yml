@@ -66,8 +66,12 @@ services:
       dockerfile: appointment-service/Dockerfile
     ports:
       - "8084:8084"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/appointmentdb
     networks:
       - appointment-network
+    depends_on:
+      - mongodb
 
 networks:
   appointment-network:
