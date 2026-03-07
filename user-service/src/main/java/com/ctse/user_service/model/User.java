@@ -19,7 +19,12 @@ public class User {
     private String id = UUID.randomUUID().toString();
 
     @NotBlank
-    private String name;
+    private String patientName;
+
+    private String contactNumber;
+    private String address;
+    private String gender;
+    private String dateOfBirth;
 
     @Email
     @NotBlank
