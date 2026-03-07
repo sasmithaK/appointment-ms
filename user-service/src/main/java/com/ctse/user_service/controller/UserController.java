@@ -24,6 +24,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<User> registerUser( @RequestBody User user) {
+        System.out.println("DEBUG REGISTER: age=" + user.getAge() + ", contact=" + user.getContactNumber());
         User created = userService.registerUser(user);
         return ResponseEntity.ok(created);
     }

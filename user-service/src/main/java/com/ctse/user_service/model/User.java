@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -19,12 +20,17 @@ public class User {
     private String id = UUID.randomUUID().toString();
 
     @NotBlank
+    @JsonProperty("patientName")
     private String patientName;
 
+    @NotBlank
+    @JsonProperty("contactNumber")
     private String contactNumber;
-    private String address;
-    private String gender;
-    private String dateOfBirth;
+
+    @NotBlank
+    @JsonProperty("age")
+    private String age;
+
 
     @Email
     @NotBlank
