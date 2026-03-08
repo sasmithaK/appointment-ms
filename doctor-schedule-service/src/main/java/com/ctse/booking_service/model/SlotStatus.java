@@ -1,8 +1,6 @@
-package com.hospital.doctorservice.model;
+package com.ctse.booking_service.model;
 
 public enum SlotStatus {
-
     AVAILABLE,
     BOOKED
-
 }

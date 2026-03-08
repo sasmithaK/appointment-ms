@@ -1,11 +1,9 @@
-package com.hospital.doctorservice.service;
+package com.ctse.booking_service.service;
 
-import com.hospital.doctorservice.model.Doctor;
-import com.hospital.doctorservice.repository.DoctorRepository;
+import com.ctse.booking_service.model.Doctor;
+import com.ctse.booking_service.repository.DoctorRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class DoctorService {
@@ -24,8 +22,8 @@ public class DoctorService {
         return doctorRepository.findAll();
     }
 
-    public Doctor getDoctor(UUID doctorId) {
+    public Doctor getDoctor(String doctorId) {
         return doctorRepository.findById(doctorId)
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+                .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + doctorId));
     }
 }

@@ -1,18 +1,14 @@
-package com.hospital.doctorservice.model;
+package com.ctse.booking_service.model;
 
-import jakarta.persistence.*;
-import java.util.UUID;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "doctors")
+@Document(collection = "doctors")
 public class Doctor {
 
     @Id
-    @GeneratedValue
-    private UUID doctorId;
-
+    private String doctorId;
     private String name;
-
     private String specialization;
 
     public Doctor() {}
@@ -22,23 +18,10 @@ public class Doctor {
         this.specialization = specialization;
     }
 
-    public UUID getDoctorId() {
-        return doctorId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getSpecialization() {
-        return specialization;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
-    }
+    public String getDoctorId() { return doctorId; }
+    public void setDoctorId(String doctorId) { this.doctorId = doctorId; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getSpecialization() { return specialization; }
+    public void setSpecialization(String specialization) { this.specialization = specialization; }
 }

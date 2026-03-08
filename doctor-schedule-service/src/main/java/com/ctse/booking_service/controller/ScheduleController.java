@@ -1,11 +1,10 @@
-package com.hospital.doctorservice.controller;
+package com.ctse.booking_service.controller;
 
-import com.hospital.doctorservice.model.Schedule;
-import com.hospital.doctorservice.service.ScheduleService;
+import com.ctse.booking_service.model.Schedule;
+import com.ctse.booking_service.service.ScheduleService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/schedules")
@@ -33,23 +32,23 @@ public class ScheduleController {
     }
 
     @PutMapping("/{slotId}")
-    public Schedule updateSchedule(@PathVariable UUID slotId,
+    public Schedule updateSchedule(@PathVariable String slotId,
                                    @RequestBody Schedule schedule) {
         return scheduleService.updateSchedule(slotId, schedule);
     }
 
     @DeleteMapping("/{slotId}")
-    public void deleteSchedule(@PathVariable UUID slotId) {
+    public void deleteSchedule(@PathVariable String slotId) {
         scheduleService.deleteSchedule(slotId);
     }
 
     @PutMapping("/{slotId}/book")
-    public Schedule bookSlot(@PathVariable UUID slotId) {
+    public Schedule bookSlot(@PathVariable String slotId) {
         return scheduleService.bookSlot(slotId);
     }
 
     @PutMapping("/{slotId}/release")
-    public Schedule releaseSlot(@PathVariable UUID slotId) {
+    public Schedule releaseSlot(@PathVariable String slotId) {
         return scheduleService.releaseSlot(slotId);
     }
 }

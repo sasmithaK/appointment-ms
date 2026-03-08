@@ -1,11 +1,10 @@
-package com.hospital.doctorservice.controller;
+package com.ctse.booking_service.controller;
 
-import com.hospital.doctorservice.model.Doctor;
-import com.hospital.doctorservice.service.DoctorService;
+import com.ctse.booking_service.model.Doctor;
+import com.ctse.booking_service.service.DoctorService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/doctors")
@@ -28,7 +27,7 @@ public class DoctorController {
     }
 
     @GetMapping("/{doctorId}")
-    public Doctor getDoctor(@PathVariable UUID doctorId) {
+    public Doctor getDoctor(@PathVariable String doctorId) {
         return doctorService.getDoctor(doctorId);
     }
 }

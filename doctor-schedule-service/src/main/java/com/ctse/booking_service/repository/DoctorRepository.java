@@ -1,6 +1,6 @@
-package com.hospital.doctorservice.repository;
+package com.ctse.booking_service.repository;
 
-import com.hospital.doctorservice.model.Doctor;
+import com.ctse.booking_service.model.Doctor;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

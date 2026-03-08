@@ -1,12 +1,10 @@
-package com.hospital.doctorservice.service;
+package com.ctse.booking_service.service;
 
-import com.hospital.doctorservice.model.Schedule;
-import com.hospital.doctorservice.model.SlotStatus;
-import com.hospital.doctorservice.repository.ScheduleRepository;
+import com.ctse.booking_service.model.Schedule;
+import com.ctse.booking_service.model.SlotStatus;
+import com.ctse.booking_service.repository.ScheduleRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class ScheduleService {
@@ -18,6 +16,7 @@ public class ScheduleService {
     }
 
     public Schedule createSchedule(Schedule schedule) {
+        schedule.setStatus(SlotStatus.AVAILABLE);
         return scheduleRepository.save(schedule);
     }
 
@@ -29,39 +28,45 @@ public class ScheduleService {
         return scheduleRepository.findByStatus(SlotStatus.AVAILABLE);
     }
 
-    public Schedule updateSchedule(UUID slotId, Schedule updatedSchedule) {
-
+    public Schedule updateSchedule(String slotId, Schedule scheduleDetails) {
         Schedule schedule = scheduleRepository.findById(slotId)
-                .orElseThrow(() -> new RuntimeException("Slot not found"));
-
-        schedule.setDate(updatedSchedule.getDate());
-        schedule.setStartTime(updatedSchedule.getStartTime());
-        schedule.setEndTime(updatedSchedule.getEndTime());
-
+                .orElseThrow(() -> new RuntimeException("Schedule not found with id: " + slotId));
+        
+        schedule.setDoctorId(scheduleDetails.getDoctorId());
+        schedule.setDate(scheduleDetails.getDate());
+        schedule.setStartTime(scheduleDetails.getStartTime());
+        schedule.setEndTime(scheduleDetails.getEndTime());
+        
         return scheduleRepository.save(schedule);
     }
 
-    public void deleteSchedule(UUID slotId) {
-        scheduleRepository.deleteById(slotId);
+    public void deleteSchedule(String slotId) {
+        Schedule schedule = scheduleRepository.findById(slotId)
+                .orElseThrow(() -> new RuntimeException("Schedule not found with id: " + slotId));
+        scheduleRepository.delete(schedule);
     }
 
-    public Schedule bookSlot(UUID slotId) {
-
+    public Schedule bookSlot(String slotId) {
         Schedule schedule = scheduleRepository.findById(slotId)
-                .orElseThrow(() -> new RuntimeException("Slot not found"));
-
+                .orElseThrow(() -> new RuntimeException("Slot not found with id: " + slotId));
+        
+        if (schedule.getStatus() == SlotStatus.BOOKED) {
+            throw new RuntimeException("Slot is already booked");
+        }
+        
         schedule.setStatus(SlotStatus.BOOKED);
-
         return scheduleRepository.save(schedule);
     }
 
-    public Schedule releaseSlot(UUID slotId) {
-
+    public Schedule releaseSlot(String slotId) {
         Schedule schedule = scheduleRepository.findById(slotId)
-                .orElseThrow(() -> new RuntimeException("Slot not found"));
-
+                .orElseThrow(() -> new RuntimeException("Slot not found with id: " + slotId));
+        
+        if (schedule.getStatus() == SlotStatus.AVAILABLE) {
+            throw new RuntimeException("Slot is already available");
+        }
+        
         schedule.setStatus(SlotStatus.AVAILABLE);
-
         return scheduleRepository.save(schedule);
     }
 }
