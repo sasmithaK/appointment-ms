@@ -10,9 +10,7 @@ spring:
         - id: user-service
           uri: ${USER_SERVICE_URL:http://localhost:8081}
           predicates:
-            - Path=/users/**
-          filters:
-            - StripPrefix=1
+            - Path=/auth/**
         - id: booking-service
           uri: ${BOOKING_SERVICE_URL:http://localhost:8082}
           predicates:
