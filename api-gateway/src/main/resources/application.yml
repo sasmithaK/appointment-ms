@@ -10,25 +10,23 @@ spring:
         - id: user-service
           uri: ${USER_SERVICE_URL:http://localhost:8081}
           predicates:
+<<<<<<< HEAD
             - Path=/auth/**
+=======
+            - Path=/users/**
+>>>>>>> feature/api-gateway
         - id: booking-service
           uri: ${BOOKING_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/bookings/**
-          filters:
-            - StripPrefix=1
         - id: notification-service
           uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=/notifications/**
-          filters:
-            - StripPrefix=1
         - id: appointment-service
           uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8084}
           predicates:
             - Path=/appointments/**
-          filters:
-            - StripPrefix=1
 
 management:
   endpoints:

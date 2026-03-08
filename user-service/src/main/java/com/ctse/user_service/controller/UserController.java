@@ -22,8 +22,12 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+<<<<<<< HEAD
 @RequestMapping("/auth")
 @Tag(name = "User Management", description = "APIs for user registration, authentication, and management")
+=======
+@RequestMapping("/users")
+>>>>>>> feature/api-gateway
 public class UserController {
     @Autowired
     private UserService userService;
