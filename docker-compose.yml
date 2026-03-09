@@ -1,10 +1,15 @@
 services:
   mongodb:
     image: mongo:latest
+    container_name: appointment-mongodb
     ports:
       - "27017:27017"
     networks:
       - appointment-network
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=userdb
 
   api-gateway:
     build:
@@ -37,6 +42,8 @@ services:
       - appointment-network
     depends_on:
       - mongodb
+    environment:
+      - SPRING_MONGODB_URI=mongodb://mongodb:27017/userdb
 
   booking-service:
     build:
@@ -76,3 +83,7 @@ services:
 networks:
   appointment-network:
     driver: bridge
+
+volumes:
+  mongodb-data:
+    driver: local
