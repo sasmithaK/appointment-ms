@@ -1,70 +1,61 @@
-# Appointment Management System
+# Appointment Management System (Microservices Architecture)
 
-A modern, robust microservices-based Appointment Management System built with Spring Boot, MongoDB, and Docker.
+A robust, enterprise-grade Appointment Management System built with Spring Boot, fully embracing a decentralized Microservices Architecture. 
 
-## 🚀 Key Features
+## 🚀 Key Features and Architecture
 
-- **Microservices Architecture**: Decoupled services for User, Booking, Notification, and Appointment management.
-- **API Gateway**: Centralized entry point with dynamic routing and health monitoring.
-- **Spring Profiles**: Seamless transition between `local` and `docker` environments.
-- **Observability**: Spring Boot Actuator integrated into all services for health checks.
-- **Persistent Storage**: MongoDB with Docker volumes to ensure data persists across restarts.
-- **Developer Experience**: 
-  - Multi-stage Docker builds for guaranteed fresh artifacts.
-  - Mongo Express UI for easy database inspection.
-  - Standardized configuration across all services.
+The system is strictly divided into 4 core domain services and 2 infrastructure services, seamlessly communicating via REST and Event-Driven patterns.
+
+- **Microservices Separation**: Logically decoupled into `user-service`, `doctor-service`, `booking-service`, and `notification-service`.
+- **API Gateway Edge Server**: Centralized public entry point (`8080`) with dynamic routing to keep backend service ports hidden and secure.
+- **Service Discovery (Netflix Eureka)**: Dynamic container registration and auto-discovery, eliminating hardcoded IPs (`8761`).
+- **Distributed Configuration (Spring Cloud Config)**: Centralized management of database URIs and environment properties (`8888`).
+- **Synchronous Communication**: Direct interservice REST calls using **Spring Cloud OpenFeign** for immediate validation (e.g., Booking -> User).
+- **Asynchronous Event-Driven Messaging**: **RabbitMQ** integration for non-blocking workflows (e.g., publishing `appointment.booked` events to trigger notifications independently).
+- **Persistent Storage**: Independent MongoDB clusters for services ensuring absolute data encapsulation.
+- **API Documentation & Health Monitoring**: Fully instrumented with **Swagger OpenAPI** (`/swagger-ui.html`) and **Spring Boot Actuator** (`/actuator/health`) across all microservices.
 
 ## 🛠 Project Structure
 
 ```text
 appointment-ms/
 ├── api-gateway/          # Spring Cloud Gateway (Port 8080)
+├── config-server/        # Centralized Properties (Port 8888)
+├── eureka-server/        # Service Registry (Port 8761)
 ├── user-service/         # User Management & Auth (Port 8081)
-├── booking-service/      # Booking Management (Port 8082)
-├── notification-service/ # Notification Handling (Port 8083)
-├── appointment-service/  # Appointment Scheduling (Port 8084)
-├── docker-compose.yml    # Full system orchestration
-└── pom.xml               # Parent Maven aggregator
+├── booking-service/      # Appointment Booking & OpenFeign (Port 8082)
+├── doctor-service/       # Doctor Profiles & Schedules (Port 8085)
+├── notification-service/ # RabbitMQ Event Subscriber (Port 8083)
+├── docker-compose.yml    # Offline Full-System Orchestration
+└── pom.xml               # Multi-Module Maven Aggregator
 ```
 
-## 🏗 Setup & Running
+## 🏗 Setup & Running Locally
 
-### Prerequisites
-- Java 17+
-- Maven
-- Docker & Docker Compose
-
-### Option 1: Full System (Docker)
-This is the easiest way to run the entire system with one command.
+### Option 1: Full System (Docker Compose)
+This is the easiest way to launch the entire ecosystem (6 Java Microservices + MongoDB + RabbitMQ) offline.
 
 ```bash
-docker-compose up --build
+docker compose up --build -d
 ```
-- **API Gateway**: `http://localhost:8080`
-- **Mongo Express UI**: `http://localhost:8085`
-- **MongoDB**: `localhost:27017`
+- **API Gateway Homepage**: `http://localhost:8080/`
+- **Eureka Dashboard**: `http://localhost:8761/`
+- **RabbitMQ Dashboard**: `http://localhost:15672/` (guest/guest)
 
-### Option 2: Individual Services (Local)
-For development, you can run services individually against a local MongoDB.
+### Option 2: Cloud Deployment (Render/Railway/AWS)
+Because this is a true Microservices architecture, you can host every service separately on the cloud. 
+1. Provision **MongoDB Atlas** and **CloudAMQP** (RabbitMQ).
+2. Deploy **Eureka Server** first natively via Docker.
+3. Deploy the **Core Services** and supply `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE`, `SPRING_MONGODB_URI`, and `SPRING_RABBITMQ_HOST` explicitly in the container environment variables.
+4. Deploy the **API Gateway** last to act as the public cloud entry point.
 
-1. **Start MongoDB**: `docker run -p 27017:27017 mongo`
-2. **Run a Service**:
-   ```bash
-   cd user-service
-   mvn spring-boot:run
-   ```
-   *The service will automatically use the `default` profile and connect to `localhost:27017`.*
+*(Refer to `docs/API_DOCUMENTATION.md` for a complete list of endpoints and `docs/final_deployment_guide.md` for detailed hosting instructions).*
 
-## 📈 Upcoming Features
-- [ ] **Service Discovery**: Integrate Netflix Eureka for dynamic service registration.
-- [ ] **Distributed Tracing**: Implement Zipkin/Sleuth for request tracking.
-- [ ] **Resilience**: Add Resilience4j for circuit breakers and retries.
-- [ ] **Security**: Implement Spring Security with OAuth2/OIDC.
-- [ ] **Messaging**: Integrate RabbitMQ or Kafka for asynchronous notifications.
+## 🧪 Testing & Interactive Documentation
 
-## 🧪 Testing Endpoints
-All endpoints are accessible via the Gateway (8080) or directly:
-- **Health**: `GET http://localhost:8080/users/actuator/health`
-- **Register**: `POST http://localhost:8080/users/auth/register`
-- **Login**: `POST http://localhost:8080/users/auth/login`
-- **Bookings**: `GET http://localhost:8080/bookings/user/{userId}`
+All underlying REST endpoints are natively documented. You can execute requests directly from your browser by navigating to the Swagger UI for any running service:
+
+- User Service API: `http://localhost:8081/swagger-ui.html`
+- Doctor Service API: `http://localhost:8085/swagger-ui.html`
+- Booking Service API: `http://localhost:8082/swagger-ui.html`
+- Gateway API: `http://localhost:8080/swagger-ui.html`
