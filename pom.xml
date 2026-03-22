@@ -24,8 +24,10 @@
 		<module>user-service</module>
 		<module>booking-service</module>
 		<module>notification-service</module>
-		<module>appointment-service</module>
+		<module>doctor-service</module>
 		<module>api-gateway</module>
+		<module>eureka-server</module>
+		<module>config-server</module>
 	</modules>
 
 	<dependencyManagement>
