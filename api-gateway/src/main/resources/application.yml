@@ -8,23 +8,19 @@ spring:
     gateway:
       routes:
         - id: user-service
-          uri: ${USER_SERVICE_URL:http://localhost:8081}
+          uri: lb://USER-SERVICE
           predicates:
-<<<<<<< HEAD
-            - Path=/auth/**
-=======
             - Path=/users/**
->>>>>>> feature/api-gateway
         - id: booking-service
-          uri: ${BOOKING_SERVICE_URL:http://localhost:8082}
+          uri: lb://BOOKING-SERVICE
           predicates:
             - Path=/bookings/**
         - id: notification-service
-          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8083}
+          uri: lb://NOTIFICATION-SERVICE
           predicates:
             - Path=/notifications/**
         - id: appointment-service
-          uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8084}
+          uri: lb://APPOINTMENT-SERVICE
           predicates:
             - Path=/appointments/**
 
