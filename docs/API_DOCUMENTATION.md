@@ -5,16 +5,17 @@ This document outlines the core responsibilities, functionalities, and API endpo
 ---
 
 ## 1. API Gateway (`api-gateway`)
-**Port:** `8080` (Default entry point for frontends/clients)
+**Port:** `8080` (Default edge server entry point for all frontend apps/clients)
 **Functionality:** 
-Acts as the single entry point to the system. It intercepts all incoming client requests, resolves the correct backend microservice using the Eureka Server registry, and routes the traffic dynamically.
-* **Routing Strategy**: Requests matching `/<service-name>/**` are forwarded to the respective microservice.
+Acts as the single public-facing entry point to the entire ecosystem. It intercepts all incoming HTTP client requests, queries the Eureka Server registry to locate the dynamic IP and Port of the target backend microservice, and routes the traffic seamlessly.
+* **Routing Strategy**: Requests matching `/<service-name>/**` are automatically forwarded. 
+* *Example:* `POST http://localhost:8080/user-service/api/users/login` routes securely to the hidden `user-service` without exposing its internal port.
 
 ---
 
 ## 2. User Service (`user-service`)
 **Port:** `8081` (Internal)
-**Functionality:** 
+**Functionality:**  
 Responsible for identity and access management. Handles patient and admin registrations, secure login, password hashing, and JWT token issuing. It stores user profiles securely in MongoDB.
 
 ### API Endpoints
@@ -84,12 +85,44 @@ A strictly event-driven microservice. It does not accept direct creation request
 
 ---
 
+## 6. Interservice Communication Architecture
+
+The microservices operate on an Event-Driven and REST-based architecture, maintaining strict boundaries while coordinating complex workflows.
+
+### Synchronous Communication (OpenFeign)
+Certain operations require immediate validation before proceeding. We use **Spring Cloud OpenFeign** for synchronous HTTP calls between internal services:
+- **Booking $\rightarrow$ User Service:** When a patient creates an appointment, the Booking Service synchronously calls the User Service (`user-service/api/users/{id}`) to verify the patient's identity exists before locking the slot.
+- **Booking $\rightarrow$ Doctor Service:** Similarly, the Booking Service synchronously calls the Doctor Service to verify the requested medical schedule actually exists and belongs to the specified doctor.
+
+### Asynchronous Communication (RabbitMQ Event Broker)
+To prevent blocking threads and maintain high availability, non-critical downstream actions are handled asynchronously via RabbitMQ.
+- **Event Publisher (Booking Service):** Once an appointment is confirmed and saved to MongoDB, the Booking Service publishes an event payload to the `appointment-exchange` with the routing key `appointment.booked`.
+- **Event Subscriber (Notification Service):** The Notification Service continuously listens to the `appointment-notification-queue`. It instantly consumes the event, formats a user-friendly alert, and saves it to its own MongoDB database, terminating the flow without ever slowing down the user's original HTTP request.
+
+---
+
 ## Infrastructure Services
 
 ### Service Registry (`eureka-server`)
 **Port:** `8761`
-Acts as the dynamic DNS for the microservices. Every service registers its IP and Port here on startup, allowing them to find each other without hardcoded IPs.
+Acts as the dynamic DNS and Address Book for the microservices. Every service securely registers its dynamic container IP and Port here on startup. This allows them to find each other by logical application names (e.g., `user-service`) rather than hardcoded static IPs, enabling API Gateway routing and OpenFeign client-side load balancing.
 
 ### Distributed Configuration (`config-server`)
 **Port:** `8888`
-Centralizes environment variables and application properties. It securely feeds database credentials, RabbitMQ URIs, and JWT keys to all microservices on launch.
+Centralizes deployment configurations securely. It leverages the `spring.config.import=optional:configserver:` directive woven into the Docker environment. Instead of maintaining 4 separate `application.properties` files with duplicate database strings, it cleanly feeds the MongoDB Atlas credentials, CloudAMQP URIs, JWT signing keys, and Eureka URLs to all 4 microservices the exact moment they launch.
+
+---
+
+## 7. Monitoring & Documentation Endpoints
+
+To ensure the robust observability required for cloud deployments, the microservices are instrumented with automated monitoring and API documentation.
+
+### Health Checks (Spring Boot Actuator)
+**Endpoint:** `GET /actuator/health`
+**Availability:** All Services
+**Purpose:** Exposes a standard HTTP ping for cloud orchestrators (like Docker Compose or Render) to continually verify that the container's Java process is alive and healthy. 
+
+### API Documentation (Swagger OpenAPI)
+**Endpoints:** `GET /swagger-ui.html` (UI) and `GET /v3/api-docs` (Raw JSON)
+**Availability:** Core Services & API Gateway
+**Purpose:** Provides a fully interactive, autogenerated graphical interface hosted directly by each microservice. It allows developers to test HTTP operations, view required JSON payloads, and explore database schemas directly from the browser without requiring external tools like Postman.
