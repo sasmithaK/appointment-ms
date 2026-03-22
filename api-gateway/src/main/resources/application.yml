@@ -8,29 +8,21 @@ spring:
     gateway:
       routes:
         - id: user-service
-          uri: ${USER_SERVICE_URL:http://localhost:8081}
+          uri: lb://USER-SERVICE
           predicates:
             - Path=/users/**
-          filters:
-            - StripPrefix=1
         - id: booking-service
-          uri: ${BOOKING_SERVICE_URL:http://localhost:8082}
+          uri: lb://BOOKING-SERVICE
           predicates:
             - Path=/bookings/**
-          filters:
-            - StripPrefix=1
         - id: notification-service
-          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8083}
+          uri: lb://NOTIFICATION-SERVICE
           predicates:
             - Path=/notifications/**
-          filters:
-            - StripPrefix=1
         - id: appointment-service
-          uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8084}
+          uri: lb://APPOINTMENT-SERVICE
           predicates:
             - Path=/appointments/**
-          filters:
-            - StripPrefix=1
 
 management:
   endpoints:

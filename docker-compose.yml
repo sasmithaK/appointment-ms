@@ -1,8 +1,38 @@
 services:
   mongodb:
     image: mongo:latest
+    container_name: appointment-mongodb
     ports:
       - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - appointment-network
+
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - appointment-network
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: eureka-server/Dockerfile
+    ports:
+      - "8761:8761"
+    networks:
+      - appointment-network
+
+  config-server:
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    ports:
+      - "8888:8888"
     networks:
       - appointment-network
 
@@ -13,17 +43,16 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - USER_SERVICE_URL=http://user-service:8081
-      - BOOKING_SERVICE_URL=http://booking-service:8082
-      - NOTIFICATION_SERVICE_URL=http://notification-service:8083
-      - APPOINTMENT_SERVICE_URL=http://appointment-service:8084
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     networks:
       - appointment-network
     depends_on:
+      - eureka-server
       - user-service
       - booking-service
       - notification-service
-      - appointment-service
 
   user-service:
     build:
@@ -32,11 +61,32 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/userdb
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_MONGODB_URI=mongodb://mongodb:27017/userdb
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     networks:
       - appointment-network
     depends_on:
       - mongodb
+      - eureka-server
+
+  doctor-service:
+    build:
+      context: .
+      dockerfile: doctor-service/Dockerfile
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_MONGODB_URI=mongodb://mongodb:27017/userdb
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+    networks:
+      - appointment-network
+    depends_on:
+      - mongodb
+      - eureka-server
 
   booking-service:
     build:
@@ -45,11 +95,14 @@ services:
     ports:
       - "8082:8082"
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/bookingdb
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     networks:
       - appointment-network
     depends_on:
       - mongodb
+      - eureka-server
 
   notification-service:
     build:
@@ -57,18 +110,22 @@ services:
       dockerfile: notification-service/Dockerfile
     ports:
       - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_MONGODB_URI=mongodb://mongodb:27017/userdb
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
     networks:
       - appointment-network
-
-  appointment-service:
-    build:
-      context: .
-      dockerfile: appointment-service/Dockerfile
-    ports:
-      - "8084:8084"
-    networks:
-      - appointment-network
+    depends_on:
+      - eureka-server
+      - rabbitmq
+      - mongodb
 
 networks:
   appointment-network:
     driver: bridge
+
+volumes:
+  mongo-data:

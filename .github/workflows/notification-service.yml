@@ -29,5 +29,13 @@ jobs:
     - name: Build with Maven
       run: ./mvnw clean package -pl notification-service -am
 
-    - name: Verify Docker Build
-      run: docker build -t notification-service ./notification-service
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and Push Docker Image
+      run: |
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/notification-service:latest -f notification-service/Dockerfile .
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/notification-service:latest
