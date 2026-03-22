@@ -1,12 +1,7 @@
 # Build stage
 FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
 WORKDIR /app
-COPY pom.xml .
-COPY user-service user-service
-COPY api-gateway api-gateway
-COPY booking-service booking-service
-COPY notification-service notification-service
-COPY appointment-service appointment-service
+COPY . .
 
 RUN mvn clean package -pl notification-service -am -DskipTests
 
