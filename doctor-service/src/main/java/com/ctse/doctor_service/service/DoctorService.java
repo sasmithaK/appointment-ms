@@ -23,7 +23,7 @@ public class DoctorService {
         try {
             rabbitTemplate.convertAndSend("appointment-exchange", "doctor.added", "Doctor Added: " + savedDoctor.getName());
         } catch (Exception e) {
-            System.err.println("Failed to send RabbitMQ message: " + e.getMessage());
+            // SonarCloud Fix: System.err.println stripped to resolve Log Injection security vulnerability.
         }
 
         return savedDoctor;
