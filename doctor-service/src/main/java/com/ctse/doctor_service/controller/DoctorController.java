@@ -30,4 +30,14 @@ public class DoctorController {
     public Doctor getDoctor(@PathVariable String doctorId) {
         return doctorService.getDoctor(doctorId);
     }
+
+    @PutMapping("/{doctorId}")
+    public Doctor updateDoctor(@PathVariable String doctorId, @RequestBody Doctor doctor) {
+        return doctorService.updateDoctor(doctorId, doctor);
+    }
+
+    @DeleteMapping("/{doctorId}")
+    public void deleteDoctor(@PathVariable String doctorId) {
+        doctorService.deleteDoctor(doctorId);
+    }
 }

@@ -29,13 +29,32 @@ jobs:
     - name: Build with Maven
       run: ./mvnw clean package -pl api-gateway -am
 
-    - name: Log in to Docker Hub
+    - name: SonarCloud Analysis
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ github.repository }} -pl api-gateway -am
+
+    - name: Log in to Azure Container Registry
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        registry: ${{ secrets.REGISTRY_USERNAME }}.azurecr.io
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
 
     - name: Build and Push Docker Image
       run: |
-        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/appointment-api-gateway:latest -f api-gateway/Dockerfile .
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/appointment-api-gateway:latest
+        docker build -t ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/api-gateway:${{ github.sha }} -f api-gateway/Dockerfile .
+        docker push ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/api-gateway:${{ github.sha }}
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Azure Container Apps
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+          az config set extension.use_dynamic_install=yes_without_prompt
+          az containerapp up --name api-gateway --resource-group AppointmentApp-RG --environment AppointmentEnv --image ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/api-gateway:${{ github.sha }} --registry-server ${{ secrets.REGISTRY_USERNAME }}.azurecr.io --registry-username ${{ secrets.REGISTRY_USERNAME }} --registry-password ${{ secrets.REGISTRY_PASSWORD }} --ingress external --target-port 8080

@@ -1,15 +1,15 @@
-name: Notification Service CI/CD
+name: User Service CI/CD
 
 on:
   push:
     branches: [ "main", "master", "dev", "feature/**" ]
     paths:
-      - 'notification-service/**'
+      - 'patient-service/**'
       - 'pom.xml'
   pull_request:
     branches: [ "main", "master", "dev" ]
     paths:
-      - 'notification-service/**'
+      - 'patient-service/**'
       - 'pom.xml'
 
 jobs:
@@ -27,13 +27,13 @@ jobs:
         cache: maven
 
     - name: Build with Maven
-      run: ./mvnw clean package -pl notification-service -am
+      run: ./mvnw clean package -pl patient-service -am
 
     - name: SonarCloud Analysis
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ github.repository }} -pl notification-service -am
+      run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{ github.repository }} -pl patient-service -am
 
     - name: Log in to Azure Container Registry
       uses: docker/login-action@v3
@@ -44,8 +44,8 @@ jobs:
 
     - name: Build and Push Docker Image
       run: |
-        docker build -t ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/notification-service:${{ github.sha }} -f notification-service/Dockerfile .
-        docker push ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/notification-service:${{ github.sha }}
+        docker build -t ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/patient-service:${{ github.sha }} -f patient-service/Dockerfile .
+        docker push ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/patient-service:${{ github.sha }}
 
     - name: Azure Login
       uses: azure/login@v1
@@ -57,4 +57,4 @@ jobs:
       with:
         inlineScript: |
           az config set extension.use_dynamic_install=yes_without_prompt
-          az containerapp up --name notification-service --resource-group AppointmentApp-RG --environment AppointmentEnv --image ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/notification-service:${{ github.sha }} --registry-server ${{ secrets.REGISTRY_USERNAME }}.azurecr.io --registry-username ${{ secrets.REGISTRY_USERNAME }} --registry-password ${{ secrets.REGISTRY_PASSWORD }} --ingress external --target-port 8083
+          az containerapp up --name patient-service --resource-group AppointmentApp-RG --environment AppointmentEnv --image ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/patient-service:${{ github.sha }} --registry-server ${{ secrets.REGISTRY_USERNAME }}.azurecr.io --registry-username ${{ secrets.REGISTRY_USERNAME }} --registry-password ${{ secrets.REGISTRY_PASSWORD }} --ingress external --target-port 8081

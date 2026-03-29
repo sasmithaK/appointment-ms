@@ -7,12 +7,12 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: user-service
-          uri: lb://USER-SERVICE
+        - id: patient-service
+          uri: lb://patient-service
           predicates:
             - Path=/users/**
-        - id: booking-service
-          uri: lb://BOOKING-SERVICE
+        - id: appointment-service
+          uri: lb://appointment-service
           predicates:
             - Path=/bookings/**
         - id: notification-service
