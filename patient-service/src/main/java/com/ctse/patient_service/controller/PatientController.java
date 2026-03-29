@@ -24,7 +24,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "User Management", description = "APIs for user registration, authentication, and management")
-public class UserController {
+public class PatientController {
     @Autowired
     private PatientService PatientService;
 
