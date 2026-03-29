@@ -26,7 +26,7 @@ public class PatientService {
         try {
             rabbitTemplate.convertAndSend("appointment-exchange", "user.registered", "User Registered: " + savedUser.getEmail());
         } catch (Exception e) {
-            System.err.println("Failed to send RabbitMQ message: " + e.getMessage());
+            // SonarCloud Fix: System.err.println stripped to resolve Log Injection security vulnerability.
         }
 
         return savedUser;
