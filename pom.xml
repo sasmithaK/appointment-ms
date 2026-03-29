@@ -22,8 +22,8 @@
 	</properties>
 
 	<modules>
-		<module>user-service</module>
-		<module>booking-service</module>
+		<module>patient-service</module>
+		<module>appointment-service</module>
 		<module>notification-service</module>
 		<module>doctor-service</module>
 		<module>api-gateway</module>
